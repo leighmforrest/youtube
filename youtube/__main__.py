@@ -10,7 +10,7 @@ if __name__ == "__main__":
     handle = "RickBeato"
     url = f'https://www.googleapis.com/youtube/v3/search?part=snippet&q=@{handle}&type=channel&key={youtube_key}'
 
-    
+    print(url)
     response = requests.get(url)
     data = response.json()
-    pprint(data)
+    pprint(data["items"][0]["id"])
