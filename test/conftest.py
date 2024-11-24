@@ -1,6 +1,7 @@
 import pytest
+from sqlalchemy.orm import Session
 from youtube.db import init_db, Base, sessionmaker
-from youtube.db.models import Channel
+from youtube.db.models import Channel, ChannelStatistics
 from test.factories import (
     YouTubeChannelListResponseFactory,
     YouTubeChannelStatisticsResponseFactory,
@@ -38,7 +39,7 @@ def test_handle():
 
 
 @pytest.fixture(scope="function")
-def db_channel(youtube_channel, session, test_handle):
+def db_channel(youtube_channel, session: Session, test_handle):
     youtube_channel = youtube_channel["items"][0]
 
     channel_data = {
@@ -57,3 +58,20 @@ def db_channel(youtube_channel, session, test_handle):
     session.commit()
 
     yield channel
+
+
+@pytest.fixture
+def db_channel_stats(db_channel: Channel, session: Session, youtube_channel_statistics):
+    stats = youtube_channel_statistics["items"][0]["statistics"]
+    print(stats)
+    statistics_data = {
+        "channel_id": db_channel.id,
+        "subscriber_count": stats["subscriberCount"],
+        "video_count": stats["videoCount"],
+        "view_count": stats["viewCount"]
+    }
+    channel_statistics = ChannelStatistics(**statistics_data)
+    session.add(channel_statistics)
+    session.commit()
+
+    yield channel_statistics

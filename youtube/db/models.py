@@ -53,7 +53,7 @@ class Channel(Base, CreatedAtMixin):
                 ChannelStatistics.channel_id == self.id,
                 ChannelStatistics.created_at >= one_day_ago(),
             )
-            .all()
+            .first()
         )
         return statistics
     

@@ -100,7 +100,6 @@ def test_get_channel_stats(
     returned_data = get_channel_stats(session, db_channel)
 
     statistics = youtube_channel_statistics["items"][0]["statistics"]
-
     id = db_channel.id
 
     expected_data = {
@@ -114,6 +113,11 @@ def test_get_channel_stats(
     assert returned_data.subscriber_count == expected_data["subscriber_count"]
     assert returned_data.video_count == expected_data["video_count"]
     assert returned_data.view_count == expected_data["view_count"]
+
+
+def test_get_channel_stats_existing_fresh(session, db_channel_stats, db_channel):
+    results = get_channel_stats(session, db_channel)
+    assert results == db_channel_stats
 
 
 def test_get_channel_existing_channel(session, test_handle, db_channel):

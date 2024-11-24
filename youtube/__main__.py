@@ -20,7 +20,7 @@ if __name__ == "__main__":
 
     handle = "@RickBeato"
     channel = get_channel(session, handle)
-    stats = get_channel_stats(session, channel)[0]
+    stats = get_channel_stats(session, channel)
 
-    print(stats.subscriber_count)
+    print(stats)
     
