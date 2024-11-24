@@ -28,6 +28,7 @@ def session():
 
     yield session
 
+    session.rollback()
     session.close()
 
 
