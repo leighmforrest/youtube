@@ -1,8 +1,8 @@
 from pathlib import Path
-from sqlalchemy import create_engine
-from pathlib import Path
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
 from youtube.db.models import Base
 
 current_dir = Path(__file__).resolve().parent

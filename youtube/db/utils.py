@@ -1,6 +1,6 @@
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy import insert
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 
 
 def get_or_create(session: Session, model, defaults=None, **kwargs):

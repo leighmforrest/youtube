@@ -1,14 +1,15 @@
-import requests
 from datetime import datetime
 from pprint import pprint
-from settings import YOUTUBE_KEY, BASE_URL
+
+import requests
+from settings import BASE_URL, YOUTUBE_KEY
 
 
 def extract_video_ids(videos):
     return [video["video_id"] for video in videos]
 
 
-def get_video_data(playlist_id="UUT3EznhW_CNFcfOlyDNTLLw", max_results=50):
+def get_video_data(playlist_id: str ="UUT3EznhW_CNFcfOlyDNTLLw", max_results=50):
     params = {
         "key": YOUTUBE_KEY,
         "part": "snippet",
@@ -30,6 +31,8 @@ def get_video_data(playlist_id="UUT3EznhW_CNFcfOlyDNTLLw", max_results=50):
         for datum in playlist_data:
             video_data = datum.get("snippet", {})
             resource_id = video_data.get("resourceId", {})
+
+            # Only proper videos, not shorts, posts, etc.
             if resource_id.get("kind") == "youtube#video":
                 published_at_iso_string = video_data.get("publishedAt")
                 published_at = datetime.fromisoformat(

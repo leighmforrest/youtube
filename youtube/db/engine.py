@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from sqlalchemy import create_engine
 
 current_dir = Path(__file__).resolve().parent

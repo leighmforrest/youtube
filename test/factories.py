@@ -11,7 +11,7 @@ class ThumbnailFactory(factory.DictFactory):
 class SnippetFactory(factory.DictFactory):
     title = factory.Faker("name")
     description = factory.Faker("sentence")
-    thumbnails = factory.SubFactory(ThumbnailFactory)
+    thumbnails = factory.Dict({"default": ThumbnailFactory.build()})
 
 
 class ContentDetailsFactory(factory.DictFactory):
@@ -32,10 +32,16 @@ class YouTubeChannelListResponseFactory(factory.DictFactory):
 
 
 class StatisticsFactory(factory.DictFactory):
-    viewCount = factory.LazyFunction(lambda: str(random.randint(1_000_000_000, 9_999_999_999)))  # 10-digit number
-    subscriberCount = factory.LazyFunction(lambda: str(random.randint(1_000_000, 9_999_999)))   # 7-digit number
+    viewCount = factory.LazyFunction(
+        lambda: str(random.randint(1_000_000_000, 9_999_999_999))
+    )  # 10-digit number
+    subscriberCount = factory.LazyFunction(
+        lambda: str(random.randint(1_000_000, 9_999_999))
+    )  # 7-digit number
     hiddenSubscriberCount = False
-    videoCount = factory.LazyFunction(lambda: str(random.randint(1_000, 9_999)))                # 4-digit number
+    videoCount = factory.LazyFunction(
+        lambda: str(random.randint(1_000, 9_999))
+    )  # 4-digit number
 
 
 class ChannelStatisticsItemsFactory(factory.DictFactory):

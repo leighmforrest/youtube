@@ -1,21 +1,23 @@
 import requests
-from pprint import pprint
-from datetime import datetime, timezone, timedelta
 from sqlalchemy.orm import Session
-from youtube.db.utils import get_or_create
+
 from youtube.db.models import Channel, ChannelStatistics
-from settings import YOUTUBE_KEY, BASE_URL
+from youtube.settings import BASE_URL, YOUTUBE_KEY
 
 
-one_day_ago = datetime.now(timezone.utc) - timedelta(days=1)
+def ensure_at_symbol(s: str) -> str:
+    """Makes sure string s has an '@' symbol in the first character."""
+    if not s.startswith("@"):
+        return "@" + s
+    return s
 
 
-def get_channel_data(handle="@RickBeato"):
-    """Retrieve channel data from the api."""
+def get_channel_data_from_api(handle):
+    handle = ensure_at_symbol(handle)
 
     channel_params = {
         "key": YOUTUBE_KEY,
-        "part": "snippet,statistics,contentDetails",
+        "part": "snippet,contentDetails",
         "forHandle": handle,
     }
 
@@ -24,51 +26,76 @@ def get_channel_data(handle="@RickBeato"):
     response = requests.get(url, channel_params)
     data = response.json()
     channel_data = data["items"][0]
-
-    # Extract the upload playlist id
     upload_playlist = channel_data["contentDetails"]["relatedPlaylists"]["uploads"]
-    print("UPLOAD PLAYLIST", upload_playlist)
 
     extracted_data = {
-        "channel_id": channel_data["id"],
+        "handle": handle,
+        "youtube_channel_id": channel_data["id"],
         "title": channel_data["snippet"]["title"],
         "description": channel_data["snippet"]["description"],
         "thumbnail_url": channel_data["snippet"]["thumbnails"]["default"]["url"],
         "upload_playlist": upload_playlist,
     }
 
-    # Remove hiddenSubscriber count from statistics
-    statistics = channel_data["statistics"]
-    print(statistics)
-    del statistics["hiddenSubscriberCount"]
+    return extracted_data
 
-    cleaned_statistics = {
-        "subscriber_count": statistics["subscriberCount"],
-        "video_count": statistics["videoCount"],
-        "view_count": statistics["viewCount"],
+
+def get_channel_stats_from_api(channel):
+    """Retrieve channel statistics from the YouTube API"""
+    handle = channel.handle
+
+    channel_params = {
+        "key": YOUTUBE_KEY,
+        "part": "statistics",
+        "forHandle": handle,
     }
 
-    return extracted_data, cleaned_statistics
+    url = f"{BASE_URL}/channels"
+    response = requests.get(url, channel_params)
+    data = response.json()
+    statistics = data["items"][0]["statistics"]
+
+    cleaned_statistics = {
+        "channel_id": channel.id,
+        "subscriber_count": int(statistics["subscriberCount"]),
+        "video_count": int(statistics["videoCount"]),
+        "view_count": int(statistics["viewCount"]),
+    }
+
+    return cleaned_statistics
 
 
-def sync_channel_stats_in_cache(channel_data: dict, statistics: dict, session: Session):
-    """Get or create the cache and get fresh (less than one day old) statistics."""
-    channel, created = get_or_create(session, Channel, **channel_data)
+def get_channel(session: Session, handle: str):
+    """Get or create a channel in the database."""
+    handle = ensure_at_symbol(handle)
+    channel = Channel.get_by_handle(session, handle)
 
-    if created:
-        print("Channel has been created.")
+    if channel:
+        print(f"Channel for {channel.handle} is in the system.")
     else:
-        print("Channel is in the cache.")
-
-    recent_statistics_query = session.query(ChannelStatistics).filter(
-        ChannelStatistics.channel_id == channel.id,
-        ChannelStatistics.created_at >= one_day_ago,
-    )
-
-    if not recent_statistics_query.first():
-        print("Cache miss: creating new channel statistics.")
-        new_statistics = ChannelStatistics(channel_id=channel.id, **statistics)
-        session.add(new_statistics)
+        print("Channel is not in the system.")
+        channel_data = get_channel_data_from_api(handle)
+        channel = Channel(**channel_data)
+        session.add(channel)
         session.commit()
+
+    return channel
+
+
+def get_channel_stats(session: Session, channel: Channel):
+    print(channel)
+    channel_statistics = channel.get_fresh_statistics(session)
+
+    if channel_statistics:
+        print(f"Statistics fresh for {channel.handle}")
     else:
-        print("Cache hit: statistics are in the cache.")
+        print(f"Statistics refreshing for {channel.handle}")
+
+        api_channel_stats = get_channel_stats_from_api(channel)
+        channel_statistics = ChannelStatistics(**api_channel_stats)
+        session.add(channel_statistics)
+        session.commit()
+
+    return channel_statistics
+
+

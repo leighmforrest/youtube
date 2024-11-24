@@ -1,10 +1,14 @@
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List
-from sqlalchemy import ForeignKey, String, TIMESTAMP, Integer
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, Session
+
+from sqlalchemy import TIMESTAMP, ForeignKey, Integer, String
+from sqlalchemy.orm import (DeclarativeBase, Mapped, Session, joinedload,
+                            mapped_column, relationship)
+from sqlalchemy.sql import func
 
 
-one_day_ago = lambda: datetime.now(timezone.utc) - timedelta(days=1)
+def one_day_ago():
+    return datetime.now(timezone.utc) - timedelta(days=1)
 
 
 class Base(DeclarativeBase):
@@ -14,7 +18,7 @@ class Base(DeclarativeBase):
 class CreatedAtMixin:
     created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
+        default=func.now(),
         nullable=False,
         index=True
     )
@@ -24,8 +28,9 @@ class Channel(Base, CreatedAtMixin):
     __tablename__ = "channel"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    channel_id: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    youtube_channel_id: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     title: Mapped[str] = mapped_column(String, nullable=False)
+    handle: Mapped[str] = mapped_column(String, nullable=False)
     description: Mapped[str] = mapped_column(String, nullable=False)
     upload_playlist: Mapped[str] = mapped_column(String, nullable=False)
     thumbnail_url: Mapped[str] = mapped_column(String, nullable=True)
@@ -33,21 +38,29 @@ class Channel(Base, CreatedAtMixin):
     statistics: Mapped[List["ChannelStatistics"]] = relationship(
         "ChannelStatistics", back_populates="channel"
     )
+    videos: Mapped[List["Video"]] = relationship(
+        "Video", back_populates="channel"
+    )
 
     def __str__(self) -> str:
-        return self.channel_id
+        return self.youtube_channel_id
 
     def get_fresh_statistics(self, session: Session):
         statistics = (
             session.query(ChannelStatistics)
+            .options(joinedload(ChannelStatistics.channel))
             .filter(
                 ChannelStatistics.channel_id == self.id,
                 ChannelStatistics.created_at >= one_day_ago(),
             )
             .all()
         )
-
         return statistics
+    
+    @classmethod
+    def get_by_handle(cls, session: Session, handle: str):
+        """Get a channel object by handle"""
+        return session.query(cls).filter(cls.handle == handle).first()
 
 
 class ChannelStatistics(Base, CreatedAtMixin):
@@ -60,6 +73,10 @@ class ChannelStatistics(Base, CreatedAtMixin):
 
     channel_id: Mapped[int] = mapped_column(Integer, ForeignKey("channel.id"))
     channel: Mapped["Channel"] = relationship("Channel", back_populates="statistics")
+
+    def __str__(self):
+        return f"{self.channel.title} Statistics"
+    
 
 
 class Video(Base, CreatedAtMixin):
@@ -74,6 +91,13 @@ class Video(Base, CreatedAtMixin):
     channel_id: Mapped[int] = mapped_column(Integer, ForeignKey("channel.id"))
     channel: Mapped["Channel"] = relationship("Channel", back_populates="videos")
 
+    statistics: Mapped[List["VideoStatistics"]] = relationship(
+        "VideoStatistics", back_populates="video"
+    )
+
+    def __str__(self) -> str:
+        return self.title
+
 
 class VideoStatistics(Base, CreatedAtMixin):
     __tablename__ = "video_statistics"
@@ -86,3 +110,6 @@ class VideoStatistics(Base, CreatedAtMixin):
 
     video_id: Mapped[int] = mapped_column(Integer, ForeignKey("video.id"))
     video: Mapped["Video"] = relationship("Video", back_populates="statistics")
+
+    def __str__(self) -> str:
+        return f"{self.video.title} Stats"
