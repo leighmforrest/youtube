@@ -6,7 +6,6 @@ from sqlalchemy.sql.expression import select
 from youtube.channels import get_channel, get_channel_stats
 from youtube.db import init_db
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="A script that retrieves data from the YouTube API"
@@ -23,4 +22,3 @@ if __name__ == "__main__":
     stats = get_channel_stats(session, channel)
 
     print(stats)
-    

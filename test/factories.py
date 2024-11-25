@@ -61,10 +61,7 @@ class YouTubeChannelStatisticsResponseFactory(factory.DictFactory):
     items = factory.List([factory.SubFactory(ChannelStatisticsItemsFactory)])
 
 
-class YouTubePlaylistItemFactory(factory.Factory):
-    class Meta:
-        model = dict
-
+class YouTubePlaylistItemFactory(factory.DictFactory):
     kind = "youtube#playlistItem"
     etag = factory.Faker("uuid4")
     id = factory.Faker("uuid4")
@@ -92,10 +89,7 @@ class YouTubePlaylistItemFactory(factory.Factory):
     )
 
 
-class YouTubePlaylistResponseFactory(factory.Factory):
-    class Meta:
-        model = dict
-
+class YouTubePlaylistResponseFactory(factory.DictFactory):
     kind = "youtube#playlistItemListResponse"
     etag = factory.Faker("uuid4")
     nextPageToken = factory.Faker("uuid4")
@@ -110,10 +104,7 @@ class YouTubePlaylistResponseFactory(factory.Factory):
     )
 
 
-class YouTubeVideoStatisticsFactory(factory.Factory):
-    class Meta:
-        model = dict
-        
+class YouTubeVideoStatisticsFactory(factory.DictFactory):
     viewCount = factory.LazyFunction(
         lambda: str(random.randint(1_000, 9_999_999_999))
     )  # 10-digit number
@@ -125,20 +116,19 @@ class YouTubeVideoStatisticsFactory(factory.Factory):
     )  # 4-digit number
 
 
-class YouTubeVideoStatisticsResponseFactory(factory.Factory):
-    class Meta:
-        model = dict
+class YouTubeVideoStatisticsResponseFactory(factory.DictFactory):
 
     kind = "youtube#videoListResponse"
     etag = factory.Faker("uuid4")
-    items = factory.List([factory.SubFactory(YouTubeVideoStatisticsFactory) for _ in range(5)])
+    items = factory.List(
+        [factory.SubFactory(YouTubeVideoStatisticsFactory) for _ in range(5)]
+    )
 
 
-
-class YouTubeVideoStatisticsResponseFactory(factory.Factory):
-    class Meta:
-        model = dict
+class YouTubeVideoStatisticsResponseFactory(factory.DictFactory):
 
     kind = "youtube#videoListResponse"
     etag = factory.Faker("uuid4")
-    items = factory.List([factory.SubFactory(YouTubeVideoStatisticsFactory) for _ in range(5)])
+    items = factory.List(
+        [factory.SubFactory(YouTubeVideoStatisticsFactory) for _ in range(5)]
+    )

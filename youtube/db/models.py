@@ -17,10 +17,7 @@ class Base(DeclarativeBase):
 
 class CreatedAtMixin:
     created_at: Mapped[datetime] = mapped_column(
-        TIMESTAMP(timezone=True),
-        default=func.now(),
-        nullable=False,
-        index=True
+        TIMESTAMP(timezone=True), default=func.now(), nullable=False, index=True
     )
 
 
@@ -38,9 +35,7 @@ class Channel(Base, CreatedAtMixin):
     statistics: Mapped[List["ChannelStatistics"]] = relationship(
         "ChannelStatistics", back_populates="channel"
     )
-    videos: Mapped[List["Video"]] = relationship(
-        "Video", back_populates="channel"
-    )
+    videos: Mapped[List["Video"]] = relationship("Video", back_populates="channel")
 
     def __str__(self) -> str:
         return self.youtube_channel_id
@@ -56,7 +51,7 @@ class Channel(Base, CreatedAtMixin):
             .first()
         )
         return statistics
-    
+
     @classmethod
     def get_by_handle(cls, session: Session, handle: str):
         """Get a channel object by handle"""
@@ -76,7 +71,6 @@ class ChannelStatistics(Base, CreatedAtMixin):
 
     def __str__(self):
         return f"{self.channel.title} Statistics"
-    
 
 
 class Video(Base, CreatedAtMixin):

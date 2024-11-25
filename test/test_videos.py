@@ -16,7 +16,7 @@ def test_get_video_statistics_normal(mock_requests_get_video_statistics):
     stats = get_video_statistics_from_api(video_ids, max_batch_size=5)
 
     assert len(stats) == 20
-    
+
     for stat in stats:
         assert "video_id" in stat
         assert "view_count" in stat
@@ -27,7 +27,7 @@ def test_get_video_statistics_normal(mock_requests_get_video_statistics):
 def test_get_video_statistics_error(mock_requests_get_video_statistics_error):
     video_ids = [f"YouTUbeID_{i}" for i in range(20)]
     stats = get_video_statistics_from_api(video_ids, max_batch_size=5)
-    
+
     assert stats == []
 
 

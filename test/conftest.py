@@ -1,11 +1,10 @@
 import json
-from test.factories import (
-    ChannelStatisticsItemsFactory,
-    YouTubeChannelListResponseFactory,
-    YouTubeChannelStatisticsResponseFactory,
-    YouTubeVideoStatisticsFactory,
-    YouTubeVideoStatisticsResponseFactory
-)
+from datetime import datetime, timedelta
+from test.factories import (ChannelStatisticsItemsFactory,
+                            YouTubeChannelListResponseFactory,
+                            YouTubeChannelStatisticsResponseFactory,
+                            YouTubeVideoStatisticsFactory,
+                            YouTubeVideoStatisticsResponseFactory)
 from test.helpers import generate_paginated_responses
 
 import pytest
@@ -79,6 +78,31 @@ def db_channel_stats(db_channel: Channel, session: Session, youtube_channel_stat
         "view_count": stats["viewCount"],
     }
     channel_statistics = ChannelStatistics(**statistics_data)
+    session.add(channel_statistics)
+    session.commit()
+
+    yield channel_statistics
+
+
+
+@pytest.fixture
+def db_channel_stats_stale(db_channel: Channel, session: Session, youtube_channel_statistics):
+    stats = youtube_channel_statistics["items"][0]["statistics"]
+    print(stats)
+    
+    # Create a datetime object that's more than one day ago
+    one_day_ago = datetime.now() - timedelta(days=1, minutes=1)  # 2 days ago for example
+    
+    statistics_data = {
+        "channel_id": db_channel.id,
+        "subscriber_count": stats["subscriberCount"],
+        "video_count": stats["videoCount"],
+        "view_count": stats["viewCount"],
+        "created_at": one_day_ago 
+    }
+    
+    channel_statistics = ChannelStatistics(**statistics_data)
+    
     session.add(channel_statistics)
     session.commit()
 

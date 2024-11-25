@@ -1,4 +1,5 @@
-from test.factories import YouTubePlaylistItemFactory, YouTubePlaylistResponseFactory
+from test.factories import (YouTubePlaylistItemFactory,
+                            YouTubePlaylistResponseFactory)
 
 
 def generate_paginated_responses(total_items=20, items_per_page=5):

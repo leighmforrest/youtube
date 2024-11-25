@@ -1,11 +1,7 @@
 import requests
 
-from youtube.channels import (
-    get_channel,
-    get_channel_data_from_api,
-    get_channel_stats,
-    get_channel_stats_from_api,
-)
+from youtube.channels import (get_channel, get_channel_data_from_api,
+                              get_channel_stats, get_channel_stats_from_api)
 from youtube.db.models import Channel
 
 
@@ -114,6 +110,43 @@ def test_get_channel_stats(
     assert returned_data.subscriber_count == expected_data["subscriber_count"]
     assert returned_data.video_count == expected_data["video_count"]
     assert returned_data.view_count == expected_data["view_count"]
+
+
+def test_get_channel_stats_stale_stats(
+    monkeypatch, youtube_channel_statistics, db_channel, session, db_channel_stats_stale
+):
+
+    def mock_request_get(url, params):
+        # Simulate an appropriate response for the given URL and params
+        class MockResponse:
+            def __init__(self, json_data, status_code):
+                self.json_data = json_data
+                self.status_code = status_code
+
+            def json(self):
+                return self.json_data
+
+        return MockResponse(youtube_channel_statistics, 200)
+
+    monkeypatch.setattr(requests, "get", mock_request_get)
+
+    returned_data = get_channel_stats(session, db_channel)
+
+    statistics = youtube_channel_statistics["items"][0]["statistics"]
+    id = db_channel.id
+
+    expected_data = {
+        "channel_id": id,
+        "subscriber_count": int(statistics["subscriberCount"]),
+        "video_count": int(statistics["videoCount"]),
+        "view_count": int(statistics["viewCount"]),
+    }
+
+    assert returned_data.channel_id == expected_data["channel_id"]
+    assert returned_data.subscriber_count == expected_data["subscriber_count"]
+    assert returned_data.video_count == expected_data["video_count"]
+    assert returned_data.view_count == expected_data["view_count"]
+    assert len(db_channel.statistics) == 2
 
 
 def test_get_channel_stats_existing_fresh(session, db_channel_stats, db_channel):

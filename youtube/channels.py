@@ -97,5 +97,3 @@ def get_channel_stats(session: Session, channel: Channel):
         session.commit()
 
     return channel_statistics
-
-
