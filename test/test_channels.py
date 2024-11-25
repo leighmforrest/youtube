@@ -1,11 +1,12 @@
 import requests
-from youtube.db.models import Channel
+
 from youtube.channels import (
-    get_channel_data_from_api,
     get_channel,
-    get_channel_stats_from_api,
+    get_channel_data_from_api,
     get_channel_stats,
+    get_channel_stats_from_api,
 )
+from youtube.db.models import Channel
 
 
 def test_channels(youtube_channel, youtube_channel_statistics):

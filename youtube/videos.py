@@ -2,14 +2,17 @@ from datetime import datetime
 from pprint import pprint
 
 import requests
-from settings import BASE_URL, YOUTUBE_KEY
+from youtube.settings import BASE_URL, YOUTUBE_KEY
 
 
 def extract_video_ids(videos):
+    """Extract a list of video IDs from a list of videos, such as the output from get_video_data_from_api"""
     return [video["video_id"] for video in videos]
 
 
-def get_video_data(playlist_id: str ="UUT3EznhW_CNFcfOlyDNTLLw", max_results=50):
+def get_video_data_from_api(playlist_id: str, max_results=50):
+    """Get video data from the YouTube API v3, given a playlist ID. Notice the API is a paginated one, and max
+    results is the maximum per page."""
     params = {
         "key": YOUTUBE_KEY,
         "part": "snippet",
@@ -58,7 +61,9 @@ def get_video_data(playlist_id: str ="UUT3EznhW_CNFcfOlyDNTLLw", max_results=50)
     return videos
 
 
-def get_video_statistics(video_ids, max_batch_size=50):
+def get_video_statistics_from_api(video_ids, max_batch_size=50):
+    """Retreive statistics for a video, given a list of videos. The videos are chunked into batches of size
+    max_batch_size for efficient data retrieval."""
     stats = []
     url = f"{BASE_URL}/videos"
 
