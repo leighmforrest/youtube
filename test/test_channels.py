@@ -1,6 +1,17 @@
-import requests
+from youtube.channels import get_channel_data_from_api, get_channel_statistics_from_api, extract_channel_api_data, extract_channel_statistics
 
-def test_api_call(mock_response):
-    response = requests.get("https://www.example.com/api", params={"id": 1})
-    assert response.status_code == 200
-    assert response.json() == {"message": "response"}
+
+def test_get_channel_data_from_api(mock_response_channel_data, channel_data, test_handle):
+    results = get_channel_data_from_api(test_handle)
+    test_channel_data = extract_channel_api_data(channel_data, test_handle)
+
+    for key, value in results.items():
+        assert results[key] == test_channel_data[key]
+
+
+def test_get_channel_statistics_from_api(mock_response_channel_statistics, channel_statistics, test_handle):
+    results = get_channel_statistics_from_api(test_handle)
+    test_channel_statistics = extract_channel_statistics(channel_statistics)
+
+    for key, value in results.items():
+        assert results[key] == test_channel_statistics[key]
