@@ -1,8 +1,5 @@
 import factory
-from faker import Faker
-
-# Be sure to use items from Faker, not factory.Faker
-fake = Faker()
+from test.factories import fake
 
 
 class ThumbnailFactory(factory.DictFactory):
