@@ -1,4 +1,5 @@
-from test.factories.videos import YouTubePlaylistItemFactory, YouTubePlaylistResponseFactory
+from test.factories.videos import (YouTubePlaylistItemFactory,
+                                   YouTubePlaylistResponseFactory)
 
 
 def generate_paginated_responses(total_items=150, items_per_page=50):
@@ -30,5 +31,5 @@ def generate_paginated_responses(total_items=150, items_per_page=50):
                 },
             )
         )
-    
+
     return responses

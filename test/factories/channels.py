@@ -1,5 +1,6 @@
-import factory
 from test.factories import fake
+
+import factory
 
 
 class ThumbnailFactory(factory.DictFactory):
@@ -15,9 +16,7 @@ class SnippetFactory(factory.DictFactory):
 
 
 class ContentDetailsFactory(factory.DictFactory):
-    relatedPlaylists = {
-        "uploads": fake.uuid4()
-    }
+    relatedPlaylists = {"uploads": fake.uuid4()}
 
 
 class ItemsFactory(factory.DictFactory):
@@ -36,7 +35,7 @@ class YouTubeChannelListResponseFactory(factory.DictFactory):
 class YouTubeChannelStatisticsFactory(factory.DictFactory):
     viewCount = fake.random_int(min=1, max=1_000_000_000)
     subscriberCount = fake.random_int(min=1, max=1_000_000_000)
-    videoCount = fake.random_int(min=0,max=1_000_000_000)
+    videoCount = fake.random_int(min=0, max=1_000_000_000)
 
 
 class YouTubeChannelStatisticsItemsFactory(factory.DictFactory):

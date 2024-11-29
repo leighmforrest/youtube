@@ -1,6 +1,7 @@
 import requests
-from youtube.utils import ensure_at_symbol
+
 from youtube.settings import BASE_URL, YOUTUBE_KEY
+from youtube.utils import ensure_at_symbol
 
 
 def extract_channel_api_data(channel_item: dict, handle: str):
@@ -16,7 +17,7 @@ def extract_channel_api_data(channel_item: dict, handle: str):
         "title": snippet["title"],
         "description": snippet["description"],
         "thumbnail_url": snippet["thumbnails"]["default"]["url"],
-        "upload_playlist": upload_playlist
+        "upload_playlist": upload_playlist,
     }
 
     return extracted_data
@@ -40,13 +41,13 @@ def get_channel_data_from_api(handle):
     channel_params = {
         "key": YOUTUBE_KEY,
         "part": "snippet,contentDetails",
-        "forHandle": handle
+        "forHandle": handle,
     }
 
     # Fetch channel data
     response = requests.get(url, channel_params)
     channel_data = response.json()
-    
+
     extracted_data = extract_channel_api_data(channel_data, handle)
     return extracted_data
 
@@ -54,15 +55,11 @@ def get_channel_data_from_api(handle):
 def get_channel_statistics_from_api(handle):
     handle = ensure_at_symbol(handle)
     url = f"{BASE_URL}/channels"
-    channel_params = {
-        "key": YOUTUBE_KEY,
-        "part": "statistics",
-        "forHandle": handle
-    }
+    channel_params = {"key": YOUTUBE_KEY, "part": "statistics", "forHandle": handle}
 
     # Fetch channel data
     response = requests.get(url, channel_params)
     channel_data = response.json()
-    
+
     extracted_data = extract_channel_statistics(channel_data)
     return extracted_data
