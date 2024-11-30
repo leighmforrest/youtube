@@ -1,7 +1,11 @@
+from datetime import datetime, timezone
 from test.factories import fake
-from test.factories.channels import ThumbnailFactory
+from test.factories.channels import ChannelFactory, ThumbnailFactory
 
 import factory
+from sqlalchemy.orm import Session
+
+from youtube.db.models import Video
 
 
 class YouTubePlaylistItemSnippetFactory(factory.DictFactory):
@@ -67,3 +71,17 @@ class YouTubeVideoStatisticsResponseFactory(factory.DictFactory):
             "resultsPerPage": 3,
         }
     )
+
+
+class VideoFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = Video
+        sqlalchemy_session = Session
+
+    video_id = factory.Faker("uuid4")
+    thumbnail_url = factory.Faker("image_url")
+    title = factory.Faker("sentence")
+    published_at = factory.LazyFunction(lambda: datetime.now(timezone.utc))
+
+    # Relationship to Channel
+    channel = factory.SubFactory(ChannelFactory)

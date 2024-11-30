@@ -1,13 +1,22 @@
-from test.factories.channels import (YouTubeChannelListResponseFactory,
-                                     YouTubeChannelStatisticsResponseFactory)
-from test.factories.videos import (YouTubeVideoStatisticsItemFactory,
-                                   YouTubeVideoStatisticsResponseFactory)
+from test.factories.channels import (
+    ChannelFactory,
+    YouTubeChannelListResponseFactory,
+    YouTubeChannelStatisticsResponseFactory,
+)
+from test.factories.videos import (
+    VideoFactory,
+    YouTubeVideoStatisticsItemFactory,
+    YouTubeVideoStatisticsResponseFactory,
+)
 from test.helpers import generate_paginated_responses
 from test.mocks import MockResponse
 
 import pytest
 import requests
+from sqlalchemy.orm import Session
 
+from youtube.db import init_db
+from youtube.db.models import Channel
 from youtube.videos import get_video_data_from_api
 
 
@@ -86,3 +95,24 @@ def mock_requests_get_video_statistics(monkeypatch):
 @pytest.fixture
 def testing_get_video_data_from_api(mock_response_get_videos):
     return get_video_data_from_api("TestPlaylistID")
+
+
+@pytest.fixture(scope="function")
+def test_session():
+    _, session = init_db("sqlite:///:memory:")
+
+    yield session
+
+    session.rollback()
+    session.close()
+
+
+@pytest.fixture(scope="function")
+def test_channel(test_session: Session):
+    ChannelFactory._meta.sqlalchemy_session = test_session
+    VideoFactory._meta.sqlalchemy_session = test_session
+    channel = ChannelFactory()
+    test_session.add(channel)
+    test_session.commit()
+
+    yield channel

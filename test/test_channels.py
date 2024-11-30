@@ -1,7 +1,9 @@
-from youtube.channels import (extract_channel_api_data,
-                              extract_channel_statistics,
-                              get_channel_data_from_api,
-                              get_channel_statistics_from_api)
+from youtube.channels import (
+    extract_channel_api_data,
+    extract_channel_statistics,
+    get_channel_data_from_api,
+    get_channel_statistics_from_api,
+)
 
 
 def test_get_channel_data_from_api(
