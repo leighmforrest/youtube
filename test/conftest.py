@@ -1,10 +1,10 @@
 from test.factories.channels import (
     ChannelFactory,
+    VideoFactory,
     YouTubeChannelListResponseFactory,
     YouTubeChannelStatisticsResponseFactory,
 )
 from test.factories.videos import (
-    VideoFactory,
     YouTubeVideoStatisticsItemFactory,
     YouTubeVideoStatisticsResponseFactory,
 )
@@ -84,7 +84,6 @@ def mock_requests_get_video_statistics(monkeypatch):
         # Simulate response for each batch of video IDs
         video_ids = params.get("id", "").split(",")
         items = [YouTubeVideoStatisticsItemFactory(id=video) for video in video_ids]
-        print(items)
         # Generate the response
         response_data = YouTubeVideoStatisticsResponseFactory(items=items)
         return MockResponse(json_data=response_data)
@@ -111,7 +110,7 @@ def test_session():
 def test_channel(test_session: Session):
     ChannelFactory._meta.sqlalchemy_session = test_session
     VideoFactory._meta.sqlalchemy_session = test_session
-    channel = ChannelFactory()
+    channel = ChannelFactory(videos=6)
     test_session.add(channel)
     test_session.commit()
 

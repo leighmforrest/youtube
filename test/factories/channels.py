@@ -1,16 +1,12 @@
 from datetime import datetime, timezone
+
 from test.factories import fake
 
 import factory
+from test.factories import ThumbnailFactory
 from sqlalchemy.orm import Session
 
 from youtube.db.models import Channel, Video
-
-
-class ThumbnailFactory(factory.DictFactory):
-    url = factory.LazyAttribute(lambda _: fake.image_url())
-    width = factory.LazyFunction(lambda: fake.random_int(min=50, max=200))
-    height = factory.LazyFunction(lambda: fake.random_int(min=50, max=200))
 
 
 class SnippetFactory(factory.DictFactory):
@@ -100,6 +96,7 @@ class ChannelFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = Channel
         sqlalchemy_session = Session  # Replace with your test session
+        sqlalchemy_session_persistence = "commit"
 
     youtube_channel_id = factory.Faker("uuid4")
     title = factory.Faker("company")
@@ -109,6 +106,17 @@ class ChannelFactory(factory.alchemy.SQLAlchemyModelFactory):
     thumbnail_url = factory.Faker("image_url")
 
     # Relationship: Videos associated with this Channel
-    videos = factory.RelatedFactoryList(
-        "test.factories.videos.VideoFactory", factory_related_name="channel", size=3
-    )
+    @factory.post_generation
+    def videos(self, create, extracted, **kwargs):
+        if not create:
+            # Simple build, do nothing
+            return
+
+        if extracted:
+            # A list or number of videos was passed in
+            if isinstance(extracted, int):
+                VideoFactory.create_batch(size=extracted, channel=self)
+            elif isinstance(extracted, list):
+                for video in extracted:
+                    video.channel = self
+                    self.videos.append(video)

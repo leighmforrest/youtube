@@ -30,13 +30,34 @@ class Channel(CustomBase, CreatedAtMixin):
     thumbnail_url: Mapped[str] = mapped_column(String(512), nullable=True)
 
     videos: Mapped[List["Video"]] = relationship("Video", back_populates="channel")
+    statistics: Mapped["ChannelStats"] = relationship(
+        "ChannelStats", back_populates="channel", uselist=False
+    )
 
     def __str__(self):
         return f"<Channel: {self.handle}>"
 
     @classmethod
     def get_by_handle(cls, session: Session, handle: str):
-        return session.query(cls).filter(cls.handle == handle).first()
+        result = session.query(cls).filter(cls.handle == handle).first()
+        if not result:
+            raise ValueError(f"Channel with handle '{handle}' not found.")
+        return result
+
+
+class ChannelStats(CustomBase, CreatedAtMixin):
+    __tablename__ = "channel_stats"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    view_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    subscriber_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    video_count: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    channel_id: Mapped[int] = mapped_column(Integer, ForeignKey("channel.id"))
+    channel: Mapped["Channel"] = relationship("Channel", back_populates="statistics")
+
+    def __str__(self) -> str:
+        return f"<Channel Statistics for {self.channel.handle}>"
 
 
 class Video(CustomBase, CreatedAtMixin):
@@ -50,3 +71,6 @@ class Video(CustomBase, CreatedAtMixin):
 
     channel_id: Mapped[int] = mapped_column(Integer, ForeignKey("channel.id"))
     channel: Mapped["Channel"] = relationship("Channel", back_populates="videos")
+
+    def __str__(self) -> str:
+        return f"<Video: {self.title}>"
