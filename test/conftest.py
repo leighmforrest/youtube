@@ -1,6 +1,9 @@
+from datetime import datetime, timedelta
+from test import test_session
 from test.factories.channels import (
-    ChannelFactory,
-    VideoFactory,
+    DBChannelFactory,
+    DBChannelStatsFactory,
+    DBVideoFactory,
     YouTubeChannelListResponseFactory,
     YouTubeChannelStatisticsResponseFactory,
 )
@@ -97,21 +100,26 @@ def testing_get_video_data_from_api(mock_response_get_videos):
 
 
 @pytest.fixture(scope="function")
-def test_session():
-    _, session = init_db("sqlite:///:memory:")
+def testing_channel():
+    yield DBChannelFactory()
 
-    yield session
-
-    session.rollback()
-    session.close()
+    test_session.rollback()
+    test_session.close()
 
 
 @pytest.fixture(scope="function")
-def test_channel(test_session: Session):
-    ChannelFactory._meta.sqlalchemy_session = test_session
-    VideoFactory._meta.sqlalchemy_session = test_session
-    channel = ChannelFactory(videos=6)
-    test_session.add(channel)
-    test_session.commit()
+def testing_videos_for_channel(testing_channel):
+    videos = [DBVideoFactory(channel=testing_channel) for _ in range(5)]
+    yield videos
 
-    yield channel
+
+@pytest.fixture(scope="function")
+def testing_channel_with_old_date(testing_channel):
+    testing_channel.created_at = datetime.now() - timedelta(days=2)
+    yield testing_channel
+
+
+@pytest.fixture(scope="function")
+def testing_channel_with_stats(testing_channel):
+    channel_stats = DBChannelStatsFactory(channel=testing_channel)
+    yield channel_stats

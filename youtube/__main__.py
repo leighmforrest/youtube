@@ -1,11 +1,9 @@
 from pprint import pprint
 
-from youtube.channels import get_channel_data_from_api, get_channel_statistics_from_api
-from youtube.videos import (
-    extract_video_ids,
-    get_video_data_from_api,
-    get_video_statistics_from_api,
-)
+from youtube.channels import (get_channel_data_from_api,
+                              get_channel_statistics_from_api)
+from youtube.videos import (extract_video_ids, get_video_data_from_api,
+                            get_video_statistics_from_api)
 
 if __name__ == "__main__":
     handle = "RickBeato"

@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
-from test.factories import fake,ThumbnailFactory
-from test.factories import channels
+from test.factories import ThumbnailFactory, channels, fake
+
 import factory
 from sqlalchemy.orm import Session
 

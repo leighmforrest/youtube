@@ -2,7 +2,8 @@ from datetime import datetime
 from typing import List
 
 from sqlalchemy import TIMESTAMP, ForeignKey, Integer, String, Text
-from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, relationship
+from sqlalchemy.orm import (DeclarativeBase, Mapped, Session, mapped_column,
+                            relationship)
 from sqlalchemy.sql import func
 
 
@@ -31,7 +32,7 @@ class Channel(CustomBase, CreatedAtMixin):
 
     videos: Mapped[List["Video"]] = relationship("Video", back_populates="channel")
     statistics: Mapped["ChannelStats"] = relationship(
-        "ChannelStats", back_populates="channel", uselist=False
+        "ChannelStats", back_populates="channel", uselist=True
     )
 
     def __str__(self):

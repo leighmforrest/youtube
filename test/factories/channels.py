@@ -1,12 +1,12 @@
 from datetime import datetime, timezone
-
-from test.factories import fake
+from test import test_session
+from test.factories import ThumbnailFactory, fake
 
 import factory
-from test.factories import ThumbnailFactory
+import factory.fuzzy
 from sqlalchemy.orm import Session
 
-from youtube.db.models import Channel, Video
+from youtube.db.models import Channel, ChannelStats, Video
 
 
 class SnippetFactory(factory.DictFactory):
@@ -56,67 +56,47 @@ class YouTubeChannelStatisticsResponseFactory(factory.DictFactory):
     )
 
 
-###
-# Database Factories
-#
-# The testing Session is to be used. Just add the parent in most cases when building.
-###
-class ChannelFactory(factory.alchemy.SQLAlchemyModelFactory):
+##
+# DB Factories
+##
+class DBChannelFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = Channel
-        sqlalchemy_session = Session
-
-    youtube_channel_id = factory.LazyFunction(fake.uuid4)
-    title = factory.LazyAttribute(lambda _: fake.name())
-    description = factory.LazyAttribute(lambda _: fake.sentence(nb_words=7))
-    handle = factory.LazyAttribute(lambda _: f"@{fake.user_name()}")
-    upload_playlist = factory.LazyFunction(fake.uuid4)
-    thumbnail_url = factory.LazyAttribute(lambda _: fake.image_url())
-
-    videos = factory.RelatedFactoryList(
-        "test.factories.channels.VideoFactory", factory_related_name="channel", size=3
-    )
-
-
-class VideoFactory(factory.alchemy.SQLAlchemyModelFactory):
-    class Meta:
-        model = Video
-        sqlalchemy_session = Session
-
-    video_id = factory.Faker("uuid4")
-    thumbnail_url = factory.Faker("image_url")
-    title = factory.Faker("sentence")
-    published_at = factory.LazyFunction(lambda: datetime.now(timezone.utc))
-
-    # Relationship to Channel
-    channel = factory.SubFactory(ChannelFactory)
-
-
-class ChannelFactory(factory.alchemy.SQLAlchemyModelFactory):
-    class Meta:
-        model = Channel
-        sqlalchemy_session = Session  # Replace with your test session
+        sqlalchemy_session = test_session
         sqlalchemy_session_persistence = "commit"
 
-    youtube_channel_id = factory.Faker("uuid4")
-    title = factory.Faker("company")
-    description = factory.Faker("sentence", nb_words=7)
-    handle = factory.LazyAttribute(lambda _: f"@{fake.user_name()}")
-    upload_playlist = factory.Faker("uuid4")
+    title = factory.LazyFunction(fake.name)
+    description = factory.LazyFunction(fake.sentence)
+    handle = factory.LazyAttribute(lambda obj: f"@{fake.user_name()}")
+    upload_playlist = factory.LazyFunction(fake.uuid4)
+    youtube_channel_id = factory.LazyFunction(fake.uuid4)
     thumbnail_url = factory.Faker("image_url")
 
-    # Relationship: Videos associated with this Channel
-    @factory.post_generation
-    def videos(self, create, extracted, **kwargs):
-        if not create:
-            # Simple build, do nothing
-            return
 
-        if extracted:
-            # A list or number of videos was passed in
-            if isinstance(extracted, int):
-                VideoFactory.create_batch(size=extracted, channel=self)
-            elif isinstance(extracted, list):
-                for video in extracted:
-                    video.channel = self
-                    self.videos.append(video)
+class DBVideoFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = Video
+        sqlalchemy_session = test_session
+        sqlalchemy_session_persistence = "commit"
+
+    thumbnail_url = factory.LazyFunction(fake.image_url)
+    title = factory.LazyFunction(fake.sentence)
+    published_at = factory.LazyFunction(fake.date_time_this_year)
+    video_id = factory.LazyFunction(fake.uuid4)
+    channel = factory.SubFactory(DBChannelFactory)
+
+
+class DBChannelStatsFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = ChannelStats
+        sqlalchemy_session = test_session
+        sqlalchemy_session_persistence = "commit"
+
+    view_count = factory.LazyFunction(lambda: fake.random_int(min=1, max=1_000_000_000))
+    subscriber_count = factory.LazyFunction(
+        lambda: fake.random_int(min=1, max=1_000_000_000)
+    )
+    video_count = factory.LazyFunction(
+        lambda: fake.random_int(min=0, max=1_000_000_000)
+    )
+    channel = factory.SubFactory(DBChannelFactory)
