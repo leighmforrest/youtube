@@ -28,6 +28,21 @@ def extract_channel_data(handle, data):
     }
 
 
+def extract_channel_stats(handle, data):
+    stats = data["statistics"]
+
+    view_count = stats["viewCount"]
+    subscriber_count = stats["subscriberCount"]
+    video_count = stats["videoCount"]
+
+    return {
+        "handle": handle,
+        "view_count": view_count,
+        "subscriber_count": subscriber_count,
+        "video_count": video_count,
+    }
+
+
 def request_channel_data(handle: str):
     try:
         params = {"forHandle": handle, "part": "snippet,contentDetails"}
@@ -35,6 +50,21 @@ def request_channel_data(handle: str):
         channel = response.get("items")[0]
 
         data = extract_channel_data(handle, channel)
+
+        return data
+    except requests.exceptions.HTTPError as e:
+        print(f"An error occurred while requesting channel data for handle: {handle}")
+        print(f"Error details: {e}")
+        return None
+
+
+def request_channel_stats(handle: str):
+    try:
+        params = {"forHandle": handle, "part": "statistics"}
+        response = get_youtube_request(params=params)
+        channel = response.get("items")[0]
+
+        data = extract_channel_stats(handle, channel)
 
         return data
     except requests.exceptions.HTTPError as e:

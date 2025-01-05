@@ -1,6 +1,6 @@
 import pytest
 from tests.mocks import MockResponse
-from tests.data import mock_channels_list_api_data
+from tests.data import mock_channels_list_api_data, mock_channels_list_api_stats
 
 
 @pytest.fixture
@@ -20,8 +20,19 @@ def mock_response(monkeypatch):
 
 
 @pytest.fixture
-def mock_channel_list_api_request(mocker):
+def mock_channel_list_api_data_request(mocker):
     test_response_data = mock_channels_list_api_data(test_handle)
+    mock_get_youtube_request = mocker.patch(
+        "youtube.channel.get_youtube_request",
+        return_value=test_response_data,
+    )
+
+    return mock_get_youtube_request
+
+
+@pytest.fixture
+def mock_channel_list_api_stats_request(mocker):
+    test_response_data = mock_channels_list_api_stats(test_handle)
     mock_get_youtube_request = mocker.patch(
         "youtube.channel.get_youtube_request",
         return_value=test_response_data,
