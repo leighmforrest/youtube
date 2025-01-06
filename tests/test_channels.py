@@ -1,6 +1,6 @@
 from tests.data import mock_channels_list_api_data, mock_channels_list_api_stats
 from requests.exceptions import HTTPError
-from youtube.channel import request_channel_data, request_channel_stats
+from youtube.channels import request_channel_data, request_channel_stats
 
 
 class TestChannel:
@@ -19,7 +19,7 @@ class TestChannel:
 
     def test_request_channel_data_error(self, mocker, test_handle):
         mock_get_youtube_request = mocker.patch(
-            "youtube.channel.get_youtube_request", side_effect=HTTPError
+            "youtube.channels.get_youtube_request", side_effect=HTTPError
         )
 
         result = request_channel_data(test_handle)
@@ -38,7 +38,7 @@ class TestChannel:
 
     def test_request_channel_stats_error(self, mocker, test_handle):
         mock_get_youtube_request = mocker.patch(
-            "youtube.channel.get_youtube_request", side_effect=HTTPError
+            "youtube.channels.get_youtube_request", side_effect=HTTPError
         )
 
         result = request_channel_stats(test_handle)

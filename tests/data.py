@@ -1,3 +1,5 @@
+from random import randint
+from datetime import datetime
 from faker import Faker
 
 
@@ -95,7 +97,7 @@ def mock_request_playlist_items_api_paginated_dictionary(
         next_page_token = f"Page_{page+1}" if page + 1 < total_pages else None
 
         # Create the response for the current page
-        responses[f"Page_{page}"] = {
+        responses[f"Page_{page}" if page > 0 else None] = {
             "kind": "youtube#playlistItemListResponse",
             "etag": fake.md5(raw_output=False),
             "nextPageToken": next_page_token,
@@ -110,7 +112,76 @@ def mock_request_playlist_items_api_paginated_dictionary(
 
 
 ##
-#   Mock extracted data
+#   YouTube Video Data. Each part has its own function to generate mock data.
+##
+def mock_request_video_snippet_part():
+    """Generate a mock video snippet."""
+    return {
+        "publishedAt": published_at(),
+        "title": fake.sentence(nb_words=3),
+        "description": fake.sentence(nb_words=10),
+        # Note: thumbnails mocks only the partial thumbnails dictionary: the default url
+        "thumbnails": {"default": {"url": fake.image_url()}},
+    }
+
+
+def mock_request_content_details_part():
+    """Generate a mock video content details."""
+    return {
+        "duration": f"PT{randint(1, 60)}M{randint(0, 59)}S",
+    }
+
+
+def mock_request_video_statistics_part():
+    """Generate a mock video statistics."""
+    return {
+        "view_count": str(fake.random_int(0, 1_000_000_000)),
+        "like_count": str(fake.random_int(0, 1_000_000)),
+        "favorite_count": str(fake.random_int(0, 1_000_000)),
+        "comment_count": str(fake.random_int(0, 1_000_000)),
+    }
+
+
+def mock_request_video_data_item(video_id):
+    return {
+        "kind": "youtube#video",
+        "etag": fake.md5(raw_output=False),
+        "id": video_id,
+        "snippet": mock_request_video_snippet_part(),
+        "contentDetails": mock_request_content_details_part(),
+        "statistics": mock_request_video_statistics_part(),
+    }
+
+
+def mock_request_video_statistics_item(video_id):
+    return {
+        "kind": "youtube#video",
+        "etag": fake.md5(raw_output=False),
+        "id": video_id,
+        "statistics": mock_request_video_statistics_part(),
+    }
+
+
+def mock_request_video_api_data(video_ids):
+    return {
+        "kind": "youtube#videoListResponse",
+        "etag": fake.md5(raw_output=False),
+        "items": [mock_request_video_data_item(video_id) for video_id in video_ids],
+    }
+
+
+def mock_request_video_api_statistics(video_ids):
+    return {
+        "kind": "youtube#videoListResponse",
+        "etag": fake.md5(raw_output=False),
+        "items": [
+            mock_request_video_statistics_item(video_id) for video_id in video_ids
+        ],
+    }
+
+
+##
+#   Mock extracted data. Each API request function will have a corresponding mock function.
 ##
 def mock_request_channel_data(handle):
     """Use to mock the output of request_channel_data()"""
@@ -132,3 +203,44 @@ def mock_request_channel_stats(handle):
         "subscriberCount": str(fake.random_int(0, 1_000_000_000)),
         "videoCount": str(fake.random_int(0, 1000)),
     }
+
+
+def mock_video_ids(num_ids=150):
+    """Use to mock the output of get_video_ids_from_api()"""
+    return [fake.lexify("???????") for id in range(num_ids)]
+
+
+def mock_video_data(video_id):
+    """Use to mock the data part of get_video_data_from_api()"""
+    raw_published_at = published_at()
+
+    return {
+        "youtube_video_id": video_id,
+        "published_at": datetime.strptime(raw_published_at, "%Y-%m-%dT%H:%M:%SZ"),
+        "title": fake.sentence(nb_words=3),
+        "description": fake.sentence(nb_words=10),
+        "thumbnail_url": fake.image_url(),
+        "duration": fake.random_int(1, 3600),
+    }
+
+
+def mock_video_stats(video_id):
+    """Use to mock the data part of get_video_data_from_api() and to mock get_video_stats_from_api()"""
+    return {
+        "youtube_video_id": video_id,
+        "view_count": fake.random_int(1, 1_000_000_000),
+        "like_count": fake.random_int(1, 1_000_000_000),
+        "favorite_count": fake.random_int(1, 1_000_000_000),
+        "comment_count": fake.random_int(1, 1_000_000_000),
+    }
+
+
+def mock_request_video_data(video_ids):
+    """Use to mock the output of get_video_data_from_api()"""
+    return [
+        (
+            mock_video_data(video_id),
+            mock_video_stats(video_id),
+        )
+        for video_id in video_ids
+    ]
