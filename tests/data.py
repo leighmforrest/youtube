@@ -46,6 +46,7 @@ def mock_channels_list_api_data(handle):
 
 
 def mock_channels_list_api_stats(handle):
+    """Mock a YouTube API request for channel statistics."""
     return {
         "kind": "youtube#channelListResponse",
         "etag": fake.md5(raw_output=False),
@@ -143,6 +144,7 @@ def mock_request_video_statistics_part():
 
 
 def mock_request_video_data_item(video_id):
+    """Generate a mock video data item from the API."""
     return {
         "kind": "youtube#video",
         "etag": fake.md5(raw_output=False),
@@ -154,6 +156,7 @@ def mock_request_video_data_item(video_id):
 
 
 def mock_request_video_statistics_item(video_id):
+    """Generate a mock video statistics item from the API."""
     return {
         "kind": "youtube#video",
         "etag": fake.md5(raw_output=False),
@@ -163,6 +166,7 @@ def mock_request_video_statistics_item(video_id):
 
 
 def mock_request_video_api_data(video_ids):
+    """Mock a response for video data and statistics from the API."""
     return {
         "kind": "youtube#videoListResponse",
         "etag": fake.md5(raw_output=False),
@@ -171,6 +175,7 @@ def mock_request_video_api_data(video_ids):
 
 
 def mock_request_video_api_statistics(video_ids):
+    """Mock a response for video statistics from the API."""
     return {
         "kind": "youtube#videoListResponse",
         "etag": fake.md5(raw_output=False),
@@ -244,3 +249,8 @@ def mock_request_video_data(video_ids):
         )
         for video_id in video_ids
     ]
+
+
+def mock_request_video_data(video_ids):
+    """Use to mock the output of get_video_stats_from_api()"""
+    return [mock_video_stats(video_id) for video_id in video_ids]
