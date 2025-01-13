@@ -14,19 +14,20 @@ if __name__ == "__main__":
     session.add(channel)
     session.commit()
 
-    print("CHANNEL ID", channel.id)
-    print("YOUTUBE ID", channel.youtube_channel_id)
+    channel = Channel.get_by_handle(session, handle)
+    print("SAVED CHANNEL ID", channel.id)
+    print("SAVED YOUTUBE ID", channel.youtube_channel_id)
 
     # get channel stats
     channel_stats_dict = request_channel_stats(channel.handle)
     del channel_stats_dict["handle"]
-    channel_stats = ChannelStats(**channel_stats_dict)
+    channel_stats = ChannelStats(**channel_stats_dict, channel=channel)
     session.add(channel_stats)
     session.commit()
 
-    print(channel_stats.subscriber_count)
-    print(channel_stats.video_count)
-    print(channel_stats.view_count)
+    print(channel.channel_stats[0].subscriber_count)
+    print(channel.channel_stats[0].video_count)
+    print(channel.channel_stats[0].view_count)
 
     # get youtube video ids
     playlist_id = channel.uploads_playlist
@@ -38,8 +39,8 @@ if __name__ == "__main__":
         video_data = video_tuple[0]
         video_stats = video_tuple[1]
         del video_stats["youtube_video_id"]
-        video = Video(**video_data)
-        video_stats = VideoStats(**video_stats)
+        video = Video(**video_data, channel=channel)
+        video_stats = VideoStats(**video_stats, video=video)
         session.add(video)
         session.add(video_stats)
         session.commit()
