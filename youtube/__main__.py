@@ -1,10 +1,14 @@
 from pprint import pprint
+from datetime import datetime, timedelta
 from youtube.channels import request_channel_data, request_channel_stats
 from videos import get_video_ids_from_api
 from videos import get_video_data_from_api, get_video_stats_from_api
 from youtube.db import init_db
 from youtube.db.models import Channel, Video, ChannelStats, VideoStats
-from sqlalchemy import select
+from youtube.db.utils import find_videos_with_no_or_old_stats
+from sqlalchemy import select, func
+
+yesterday_and_ten_seconds = datetime.now() - timedelta(days=1, seconds=10)
 
 if __name__ == "__main__":
     _, session = init_db()
@@ -51,3 +55,18 @@ if __name__ == "__main__":
 
     for vid in videos:
         print(f"{vid.view_count}")
+
+    # pick 25 video_stats rows at random
+    stmt = select(VideoStats).order_by(func.random()).limit(25)
+    results = session.scalars(stmt).all()
+
+    for row in results:
+        row.created_at = yesterday_and_ten_seconds
+        session.add(row)
+        session.commit()
+
+    videos = find_videos_with_no_or_old_stats(session, channel)
+
+    print(f"The old video length is {len(videos)}")
+
+    session.close()
