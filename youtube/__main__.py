@@ -66,7 +66,24 @@ if __name__ == "__main__":
         session.commit()
 
     videos = find_videos_with_no_or_old_stats(session, channel)
+    print(f"The number of videos with stale stats is {len(videos)}")
+    old_video_ids = [video.youtube_video_id for video in videos]
+    new_video_stats = get_video_stats_from_api(old_video_ids)
 
-    print(f"The old video length is {len(videos)}")
+    # for every new video stat
+    for new_video_stats_dict in new_video_stats:
+        # get video by id
+        video = Video.get_by_youtube_video_id(
+            session, new_video_stats_dict["youtube_video_id"]
+        )
+        # delete youtube_video_id in dict
+        del new_video_stats_dict["youtube_video_id"]
+        # save new stats to database
+        video_stats = VideoStats(**new_video_stats_dict, video=video)
+        session.add(video_stats)
+        session.commit()
+
+    videos = find_videos_with_no_or_old_stats(session, channel)
+    print(f"The number of videos with stale stats is {len(videos)}")
 
     session.close()
