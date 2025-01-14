@@ -122,4 +122,4 @@ class VideoStats(CustomBase, CreatedAtMixin):
     video = relationship("Video", back_populates="video_stats")
 
     def __str__(self):
-        return f"<VideoStats: {self.id}>"
+        return f"<VideoStats: {self.video.title}>"

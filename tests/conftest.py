@@ -1,4 +1,5 @@
 import pytest
+from sqlalchemy.orm import Session
 from tests.mocks import MockResponse
 from tests.data import (
     mock_channels_list_api_data,
@@ -7,7 +8,12 @@ from tests.data import (
     mock_video_ids,
     mock_request_video_api_data,
     mock_request_video_api_statistics,
+    db_mock_channel,
+    db_mock_video,
+    db_mock_video_stats,
 )
+from youtube.db import init_db
+from youtube.db.models import Channel, Video, VideoStats
 
 
 @pytest.fixture
@@ -96,3 +102,50 @@ def mock_youtube_video_statistics_api_request(mock_youtube_video_ids, mocker):
     mock = mocker.patch("youtube.videos.get_youtube_request", side_effect=mock_request)
 
     return mock
+
+
+##
+#   Database Fixtures
+##
+@pytest.fixture(scope="function")
+def test_session():
+    engine, test_session = init_db("sqlite+pysqlite:///:memory:")
+
+    yield test_session
+
+    test_session.close()
+    engine.dispose()
+
+
+@pytest.fixture(scope="function")
+def test_channel(test_handle: str, test_session: Session):
+    channel_data = db_mock_channel(test_handle)
+    channel = Channel(**channel_data)
+    test_session.add(channel)
+    test_session.commit()
+
+    yield channel
+
+
+@pytest.fixture(scope="function")
+def test_five_videos(test_channel, test_session):
+    video_data = [db_mock_video() for _ in range(5)]
+    test_videos = [
+        Video(**video_dict, channel=test_channel) for video_dict in video_data
+    ]
+    test_session.add_all(test_videos)
+    test_session.commit()
+
+    yield test_videos
+
+
+@pytest.fixture(scope="function")
+def test_five_videos_stats_current(test_five_videos, test_session):
+    video_stats_data_list = [
+        {**db_mock_video_stats(), "video": video} for video in test_five_videos
+    ]
+    video_stats = [VideoStats(**data) for data in video_stats_data_list]
+    test_session.add_all(video_stats)
+    test_session.commit()
+
+    yield video_stats

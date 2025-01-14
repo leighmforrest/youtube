@@ -254,3 +254,41 @@ def mock_request_video_data(video_ids):
 def mock_request_video_data(video_ids):
     """Use to mock the output of get_video_stats_from_api()"""
     return [mock_video_stats(video_id) for video_id in video_ids]
+
+
+##
+#   DB Mock Data
+##
+def db_mock_channel(handle):
+    """Mock data for SQLAlchemy Channel model."""
+    return {
+        "handle": handle,
+        "youtube_channel_id": fake.lexify("UC????????????????????"),
+        "title": fake.name(),
+        "description": fake.sentence(nb_words=3),
+        "thumbnail_url": fake.image_url(),
+        "uploads_playlist": fake.lexify("UU????????????????????"),
+    }
+
+
+def db_mock_video():
+    """Mock data for a SQLAlchemy Video model, less channel."""
+    raw_published_at = published_at()
+
+    return {
+        "youtube_video_id": fake.lexify("???????"),
+        "published_at": datetime.strptime(raw_published_at, "%Y-%m-%dT%H:%M:%SZ"),
+        "title": fake.sentence(nb_words=3),
+        "description": fake.sentence(nb_words=10),
+        "thumbnail_url": fake.image_url(),
+        "duration": fake.random_int(1, 3600),
+    }
+
+
+def db_mock_video_stats():
+    return {
+        "view_count": fake.random_int(1, 1_000_000_000),
+        "like_count": fake.random_int(0, 1_000_000_000),
+        "favorite_count": fake.random_int(1, 1_000_000_000),
+        "comment_count": fake.random_int(1, 1_000_000_000),
+    }
