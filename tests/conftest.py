@@ -1,4 +1,5 @@
 import pytest
+from datetime import datetime, timezone, timedelta
 from sqlalchemy.orm import Session
 from tests.mocks import MockResponse
 from tests.data import (
@@ -151,9 +152,36 @@ def test_five_videos(test_channel, test_session):
 
 
 @pytest.fixture(scope="function")
+def test_seven_videos_with_old_stats(test_channel, test_session):
+    video_data = [db_mock_video() for _ in range(7)]
+    test_videos = [
+        Video(**video_dict, channel=test_channel) for video_dict in video_data
+    ]
+    test_session.add_all(test_videos)
+    test_session.commit()
+
+    yield test_videos
+
+
+@pytest.fixture(scope="function")
 def test_five_videos_stats_current(test_five_videos, test_session):
     video_stats_data_list = [
         {**db_mock_video_stats(), "video": video} for video in test_five_videos
+    ]
+    video_stats = [VideoStats(**data) for data in video_stats_data_list]
+    test_session.add_all(video_stats)
+    test_session.commit()
+
+    yield video_stats
+
+
+@pytest.fixture
+def test_seven_videos_stats_old(test_session, test_seven_videos_with_old_stats):
+    old_date = datetime.now(tz=timezone.utc) - timedelta(hours=24, minutes=10)
+
+    video_stats_data_list = [
+        {**db_mock_video_stats(), "video": video, "created_at": old_date}
+        for video in test_five_videos
     ]
     video_stats = [VideoStats(**data) for data in video_stats_data_list]
     test_session.add_all(video_stats)

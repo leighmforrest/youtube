@@ -84,6 +84,7 @@ class TestChannelStats:
         self, test_channel_stats: ChannelStats, test_channel: Channel
     ):
         assert test_channel_stats.channel == test_channel
+        assert test_channel_stats.id > 0
         assert test_channel_stats.video_count >= 0
         assert test_channel_stats.view_count >= 0
         assert test_channel_stats.subscriber_count >= 0
