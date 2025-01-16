@@ -140,6 +140,19 @@ def test_channel_stats(test_channel: Channel, test_session: Session):
 
 
 @pytest.fixture(scope="function")
+def test_channel_stats_old(test_channel: Channel, test_session: Session):
+    old_date = datetime.now(tz=timezone.utc) - timedelta(hours=24, minutes=10)
+    channel_stats_data = db_mock_channel_stats()
+    channel_stats = ChannelStats(
+        **channel_stats_data, channel=test_channel, created_at=old_date
+    )
+    test_session.add(channel_stats)
+    test_session.commit()
+
+    yield channel_stats
+
+
+@pytest.fixture(scope="function")
 def test_five_videos(test_channel, test_session):
     video_data = [db_mock_video() for _ in range(5)]
     test_videos = [

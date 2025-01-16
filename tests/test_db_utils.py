@@ -10,6 +10,16 @@ class TestGetRecentChannelStats:
         results = get_recent_channel_stats(test_session, test_channel)
         assert results == test_channel_stats
 
+    def test_get_recent_channel_stats_none(self, test_channel, test_session):
+        results = get_recent_channel_stats(test_session, test_channel)
+        assert results is None
+
+    def test_get_recent_channel_stats_none(
+        self, test_channel, test_session, test_channel_stats_old
+    ):
+        results = get_recent_channel_stats(test_session, test_channel)
+        assert results is None
+
 
 class TestFindVideosWithNoOrOldStats:
     def test_find_videos_with_no_or_old_stats_no_olds(
