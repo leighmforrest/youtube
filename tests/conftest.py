@@ -11,9 +11,10 @@ from tests.data import (
     db_mock_channel,
     db_mock_video,
     db_mock_video_stats,
+    db_mock_channel_stats,
 )
 from youtube.db import init_db
-from youtube.db.models import Channel, Video, VideoStats
+from youtube.db.models import Channel, Video, VideoStats, ChannelStats
 
 
 @pytest.fixture
@@ -125,6 +126,16 @@ def test_channel(test_handle: str, test_session: Session):
     test_session.commit()
 
     yield channel
+
+
+@pytest.fixture(scope="function")
+def test_channel_stats(test_channel: Channel, test_session: Session):
+    channel_stats_data = db_mock_channel_stats()
+    channel_stats = ChannelStats(**channel_stats_data, channel=test_channel)
+    test_session.add(channel_stats)
+    test_session.commit()
+
+    yield channel_stats
 
 
 @pytest.fixture(scope="function")

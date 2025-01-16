@@ -271,6 +271,15 @@ def db_mock_channel(handle):
     }
 
 
+def db_mock_channel_stats():
+    """Mock data for SQLAlchemy ChannelStats model, less channel."""
+    return {
+        "view_count": str(fake.random_int(0, 1_000_000_000)),
+        "subscriber_count": str(fake.random_int(0, 1_000_000_000)),
+        "video_count": str(fake.random_int(0, 1000)),
+    }
+
+
 def db_mock_video():
     """Mock data for a SQLAlchemy Video model, less channel."""
     raw_published_at = published_at()
@@ -286,6 +295,7 @@ def db_mock_video():
 
 
 def db_mock_video_stats():
+    """Mock data for a SQLAlchemy VideoStats model, less video."""
     return {
         "view_count": fake.random_int(1, 1_000_000_000),
         "like_count": fake.random_int(0, 1_000_000_000),

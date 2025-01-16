@@ -1,6 +1,6 @@
 import pytest
 from datetime import datetime
-from youtube.db.models import Channel, Video, VideoStats
+from youtube.db.models import Channel, Video, VideoStats, ChannelStats
 from youtube.db.utils import find_videos_with_no_or_old_stats
 
 
@@ -68,6 +68,7 @@ class TestVideoStats:
         for video in test_five_videos:
             video_stats = video.video_stats[0]
             assert isinstance(video_stats, VideoStats)
+            assert isinstance(video_stats.id, int)
             assert isinstance(video_stats.view_count, int)
             assert isinstance(video_stats.like_count, int)
             assert isinstance(video_stats.comment_count, int)
@@ -76,3 +77,19 @@ class TestVideoStats:
     def test_video_stats___str__(self, test_five_videos_stats_current):
         for video_stats in test_five_videos_stats_current:
             assert str(video_stats) == f"<VideoStats: {video_stats.video.title}>"
+
+
+class TestChannelStats:
+    def test_channel_stats_exist(
+        self, test_channel_stats: ChannelStats, test_channel: Channel
+    ):
+        assert test_channel_stats.channel == test_channel
+        assert test_channel_stats.video_count >= 0
+        assert test_channel_stats.view_count >= 0
+        assert test_channel_stats.subscriber_count >= 0
+
+    def test_channel_stats___str__(self, test_channel_stats):
+        assert (
+            str(test_channel_stats)
+            == f"<ChannelStats: {test_channel_stats.channel.handle}>"
+        )

@@ -103,7 +103,7 @@ class ChannelStats(CustomBase, CreatedAtMixin):
     channel = relationship("Channel", back_populates="channel_stats")
 
     def __str__(self):
-        return f"<ChannelStats: {self.id}>"
+        return f"<ChannelStats: {self.channel.handle}>"
 
 
 class VideoStats(CustomBase, CreatedAtMixin):
