@@ -76,14 +76,14 @@ class Video(CustomBase, CreatedAtMixin):
 
     @classmethod
     def get_by_youtube_video_id(cls, session, youtube_video_id):
-        """Find a channel by its youtube_video_id"""
+        """Find a video by its youtube_video_id"""
         result = (
             session.query(cls).filter(cls.youtube_video_id == youtube_video_id).first()
         )
 
         if not result:
             raise ValueError(
-                f"Channel with youtube_video_id {youtube_video_id} not found."
+                f"Video with youtube_video_id {youtube_video_id} not found."
             )
         return result
 

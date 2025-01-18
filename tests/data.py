@@ -204,9 +204,9 @@ def mock_request_channel_stats(handle):
     """Use to mock the output of request_channel_stats()"""
     return {
         "handle": handle,
-        "viewCount": str(fake.random_int(0, 1_000_000_000)),
-        "subscriberCount": str(fake.random_int(0, 1_000_000_000)),
-        "videoCount": str(fake.random_int(0, 1000)),
+        "view_count": str(fake.random_int(0, 1_000_000_000)),
+        "subscriber_count": str(fake.random_int(0, 1_000_000_000)),
+        "video_count": str(fake.random_int(0, 1000)),
     }
 
 
