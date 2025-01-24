@@ -4,6 +4,7 @@ from youtube.utils import chunk_list, get_total_seconds
 
 
 def extract_video_data(data):
+    """Extract needed video data from api data."""
     video_id = data["id"]
     snippet = data["snippet"]
     thumbnails = snippet["thumbnails"]
@@ -24,6 +25,7 @@ def extract_video_data(data):
 
 
 def extract_video_statistics(data):
+    """Extract needed statistics from api data."""
     video_id = data["id"]
     statistics = data["statistics"]
 

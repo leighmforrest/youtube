@@ -251,7 +251,7 @@ def mock_request_video_data(video_ids):
     ]
 
 
-def mock_request_video_data(video_ids):
+def mock_request_video_stats(video_ids):
     """Use to mock the output of get_video_stats_from_api()"""
     return [mock_video_stats(video_id) for video_id in video_ids]
 

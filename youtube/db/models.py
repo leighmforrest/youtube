@@ -69,7 +69,9 @@ class Video(CustomBase, CreatedAtMixin):
 
     # Relationships
     channel = relationship("Channel", back_populates="videos")
-    video_stats = relationship("VideoStats", back_populates="video")
+    video_stats = relationship(
+        "VideoStats", back_populates="video", cascade="all, delete-orphan"
+    )
 
     def __str__(self):
         return f"<Video: {self.title}>"

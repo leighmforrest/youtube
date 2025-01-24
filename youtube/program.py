@@ -97,7 +97,7 @@ def get_video_data(channel: Channel, session: Session):
 def get_video_stats(channel: Channel, session: Session):
     """Check and update stats for videos."""
     youtube_video_ids = find_videos_with_no_or_old_stats(session, channel)
-
+    print("VIDEO IDS", youtube_video_ids)
     if not youtube_video_ids:
         print("All videos have up-to-date stats.")
     else:
@@ -108,13 +108,13 @@ def get_video_stats(channel: Channel, session: Session):
 
         # save video stats to database
         for video_stats_dict in video_stats:
-            print(video_stats_dict)
             youtube_video_id = video_stats_dict["youtube_video_id"]
             del video_stats_dict["youtube_video_id"]
 
-            video = Video.get_by_youtube_video_id(session, youtube_video_id)
-            print(video)
-            video_stats_objects.append(VideoStats(**video_stats_dict, video=video))
+            with session.no_autoflush:
+                video = Video.get_by_youtube_video_id(session, youtube_video_id)
+
+                video_stats_objects.append(VideoStats(**video_stats_dict, video=video))
 
         session.add_all(video_stats_objects)
         session.commit()
