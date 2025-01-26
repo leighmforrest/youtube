@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+import pandas as pd
 from sqlalchemy.orm import Session, aliased
 from sqlalchemy.sql import not_
 from sqlalchemy.sql import select, exists
@@ -44,3 +45,40 @@ def find_videos_with_no_or_old_stats(session: Session, channel: Channel):
     # Execute and return results
     result = session.execute(query).scalars().all()
     return result
+
+
+def create_time_series_dataframe(session: Session, channel: Channel):
+    one_day_ago_time = one_day_ago()
+    query = (
+        session.query(
+            Channel.title.label("channel_title"),
+            Video.title.label("video_title"),
+            Video.youtube_video_id.label("youtube_video_id"),
+            Video.published_at.label("published_at"),
+            VideoStats.view_count.label("view_count"),
+            VideoStats.like_count.label("like_count"),
+            VideoStats.comment_count.label("comment_count"),
+        )
+        .join(Video, VideoStats.video_id == Video.id)
+        .join(Channel, Video.channel_id == Channel.id)
+        .filter(VideoStats.created_at >= one_day_ago_time)
+        .filter(Video.channel == channel)
+        .order_by(Video.published_at)
+    )
+
+    results = query.all()
+
+    df = pd.DataFrame(
+        results,
+        columns=[
+            "channel_title",
+            "video_title",
+            "youtube_video_id",
+            "published_at",
+            "view_count",
+            "like_count",
+            "comment_count",
+        ],
+    )
+
+    return df

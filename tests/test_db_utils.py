@@ -1,6 +1,10 @@
 import pytest
 
-from youtube.db.utils import get_recent_channel_stats, find_videos_with_no_or_old_stats
+from youtube.db.utils import (
+    get_recent_channel_stats,
+    find_videos_with_no_or_old_stats,
+    create_time_series_dataframe,
+)
 
 
 class TestGetRecentChannelStats:
@@ -66,3 +70,35 @@ class TestFindVideosWithNoOrOldStats:
 
         for youtube_id in youtube_ids:
             assert youtube_id in result
+
+
+class TestCreateTimeSeriesDataframe:
+    def test_generate_dataframe(
+        self, test_session, test_five_videos_stats_current, test_channel
+    ):
+        results = create_time_series_dataframe(test_session, test_channel)
+        columns = results.columns
+        assert len(columns) == 7
+        assert len(results) == 5
+
+        for column in columns:
+            assert (
+                results[column].notnull().all()
+            ), f"Column {column} contains null values"
+
+    def test_generate_dataframe_with_old_stats(
+        self,
+        test_session,
+        test_five_videos_stats_current,
+        test_seven_videos_with_old_stats,
+        test_channel,
+    ):
+        results = create_time_series_dataframe(test_session, test_channel)
+        columns = results.columns
+        assert len(columns) == 7
+        assert len(results) == 5
+
+        for column in columns:
+            assert (
+                results[column].notnull().all()
+            ), f"Column {column} contains null values"
