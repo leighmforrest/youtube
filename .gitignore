@@ -6,4 +6,3 @@ youtube.db
 *.csv
 htmlcov
 .pytest_cache
-data
