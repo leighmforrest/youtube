@@ -2,6 +2,7 @@
 
 This program retrieves data from the YouTube JSON API v3, stores the data in a sqlite database, displays the data (view_count, like_count, comment_count) in individual matplotlib charts using the date on the x axis.Then it stores the retrieved data in a csv in the data directory, allowing the user to analyze the data in a way he/she
 sees fit. 
+
 ---
 
 ## Up and Running
