@@ -81,4 +81,6 @@ def create_time_series_dataframe(session: Session, channel: Channel):
         ],
     )
 
+    df.set_index("published_at", inplace=True)
+
     return df

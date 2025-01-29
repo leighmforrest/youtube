@@ -1,4 +1,5 @@
 import pytest
+import pandas as pd
 
 from youtube.db.utils import (
     get_recent_channel_stats,
@@ -77,14 +78,22 @@ class TestCreateTimeSeriesDataframe:
         self, test_session, test_five_videos_stats_current, test_channel
     ):
         results = create_time_series_dataframe(test_session, test_channel)
+        assert isinstance(results, pd.DataFrame)
         columns = results.columns
-        assert len(columns) == 7
+        assert len(columns) == 6
         assert len(results) == 5
 
         for column in columns:
             assert (
                 results[column].notnull().all()
             ), f"Column {column} contains null values"
+
+    def test_dataframe_index(
+        self, test_session, test_five_videos_stats_current, test_channel
+    ):
+        results = create_time_series_dataframe(test_session, test_channel)
+        indices = results.index.names
+        assert "published_at" in indices
 
     def test_generate_dataframe_with_old_stats(
         self,
@@ -95,7 +104,7 @@ class TestCreateTimeSeriesDataframe:
     ):
         results = create_time_series_dataframe(test_session, test_channel)
         columns = results.columns
-        assert len(columns) == 7
+        assert len(columns) == 6
         assert len(results) == 5
 
         for column in columns:

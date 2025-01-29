@@ -1,5 +1,10 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select
+import mplcursors
+import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter, MaxNLocator
+
 
 from youtube.channels import request_channel_data, request_channel_stats
 from youtube.videos import (
@@ -9,6 +14,9 @@ from youtube.videos import (
 )
 from youtube.db.models import Channel, ChannelStats, Video, VideoStats
 from youtube.db.utils import get_recent_channel_stats, find_videos_with_no_or_old_stats
+
+
+METRICS = {"view_count": {"color": "red", "display_name": "View Count"}}
 
 
 def save_channel_stats(session: Session, channel: Channel, handle: str):
@@ -120,3 +128,46 @@ def get_video_stats(channel: Channel, session: Session):
         session.commit()
 
         print(f"Saved {len(video_stats_objects)} to database.")
+
+
+def create_graph_from_dataframe(df: pd.DataFrame, metric="view_count"):
+    graph_metric = METRICS.get(metric, METRICS["view_count"])  # Ensure default is valid
+    fig, ax = plt.subplots(figsize=(16, 6))
+
+    # Ensure DataFrame index is sorted
+    df = df.sort_index()
+
+    # Create the scatter plot and store it in a variable
+    scatter = ax.scatter(df.index, df[metric], color=graph_metric["color"], s=2)
+
+    # Set x-axis limit
+    ax.set_xlim(df.index.min(), df.index.max())
+
+    # Format y-axis with thousands separator
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{int(x):,}"))
+
+    # Set the number of ticks on the y-axis
+    ax.yaxis.set_major_locator(MaxNLocator(nbins=10, integer=True))
+
+    # Add labels and grid for better readability
+    ax.set_title(f"Time Series of {graph_metric['display_name']}", fontsize=16)
+    ax.set_xlabel("Published At", fontsize=14)
+    ax.set_ylabel(graph_metric["display_name"], fontsize=14)
+    ax.grid(True, linestyle="--", alpha=0.6)
+
+    # Add the tooltip to the scatter plot
+    cursor = mplcursors.cursor(scatter, hover=True)
+
+    @cursor.connect("add")
+    def on_add(sel):
+        # Find the nearest data point's index
+        index = sel.index
+        if index < len(df):  # Ensure index is within bounds
+            video_title = df.iloc[index]["video_title"]
+            sel.annotation.set_text(
+                f"Title: {video_title}\n{graph_metric['display_name']}: {int(df.iloc[index][metric])}"
+            )
+
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.show()
