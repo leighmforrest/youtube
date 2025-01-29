@@ -25,4 +25,4 @@ Get into the project root to create the virtual environment and install the depe
 
 `python youtube <handle>`
 
-The handle argument need not have the `@` symbol; it will be added automatically.
+Handle is the handle of the YouTube channel that you want data on. The handle argument need not have the `@` symbol; it will be added automatically.
