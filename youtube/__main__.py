@@ -8,6 +8,7 @@ from youtube.program import (
     create_graph_from_dataframe,
     display_stats_from_dataframe,
     save_to_csv,
+    display_channel_stats,
 )
 from youtube.utils import remove_at_symbol, add_at_symbol
 from youtube.settings import BASE_DIR
@@ -33,17 +34,13 @@ if __name__ == "__main__":
         print(f"Retrieving {handle}...")
         channel = get_channel_data(handle, session)
 
-        # dipslplay latest stats for channel
-        channel_stats = get_recent_channel_stats(session, channel)
-        print("View Count:", channel_stats.view_count)
-        print("Subscriber Count:", channel_stats.subscriber_count)
-        print("Video Count:", channel_stats.video_count)
-
         # get video  ids for the channel
         get_video_data(channel, session)
         get_video_stats(channel, session)
         df = create_time_series_dataframe(session, channel)
 
+        # Display channel stats
+        display_channel_stats(session, channel)
         # Display stats from dataframe
         display_stats_from_dataframe(df)
 

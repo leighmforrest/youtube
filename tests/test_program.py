@@ -17,6 +17,7 @@ from youtube.program import (
     create_graph_from_dataframe,
     save_to_csv,
     display_stats_from_dataframe,
+    display_channel_stats,
 )
 from youtube.utils import remove_at_symbol, snake_to_capitals
 from youtube.db.utils import get_recent_channel_stats, find_videos_with_no_or_old_stats
@@ -188,3 +189,17 @@ class TestDisplayStatsFromDataframe:
         captured = capsys.readouterr()
 
         assert snake_to_capitals(metric) in captured.out
+
+
+class TestDisplayChannelStats:
+    def test_display_channel_stats(
+        self, test_session, test_channel, test_channel_stats, capsys
+    ):
+        test_stats = get_recent_channel_stats(test_session, test_channel)
+        display_channel_stats(test_session, test_channel)
+        captured = capsys.readouterr()
+
+        assert f"Stats for {test_channel.handle}" in captured.out
+        assert f"{test_stats.video_count}" in captured.out
+        assert f"{test_stats.view_count}" in captured.out
+        assert f"{test_stats.subscriber_count}" in captured.out

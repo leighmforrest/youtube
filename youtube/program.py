@@ -199,3 +199,13 @@ def display_stats_from_dataframe(df: pd.DataFrame):
 def save_to_csv(df: pd.DataFrame, target_dir: Path):
     """Save data to work with the data elsewhere."""
     df.to_csv(target_dir)
+
+
+def display_channel_stats(session: Session, channel: Channel):
+    # dipslplay latest stats for channel
+    channel_stats = get_recent_channel_stats(session, channel)
+
+    print(f"Stats for {channel.handle}")
+    print("View Count:", channel_stats.view_count)
+    print("Subscriber Count:", channel_stats.subscriber_count)
+    print("Video Count:", channel_stats.video_count)
