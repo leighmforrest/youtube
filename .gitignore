@@ -3,3 +3,6 @@ __pycache__/
 .env
 .coverage
 youtube.db
+*.csv
+htmlcov
+.pytest_cache

@@ -1,3 +1,4 @@
+from pathlib import Path
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 import mplcursors
@@ -7,6 +8,7 @@ from matplotlib.ticker import FuncFormatter, MaxNLocator
 
 
 from youtube.channels import request_channel_data, request_channel_stats
+from youtube.utils import snake_to_capitals
 from youtube.videos import (
     get_video_ids_from_api,
     get_video_data_from_api,
@@ -16,7 +18,11 @@ from youtube.db.models import Channel, ChannelStats, Video, VideoStats
 from youtube.db.utils import get_recent_channel_stats, find_videos_with_no_or_old_stats
 
 
-METRICS = {"view_count": {"color": "red", "display_name": "View Count"}}
+METRICS = {
+    "view_count": {"color": "red", "display_name": "View Count"},
+    "like_count": {"color": "green", "display_name": "Like Count"},
+    "comment_count": {"color": "blue", "display_name": "Favorite  Count"},
+}
 
 
 def save_channel_stats(session: Session, channel: Channel, handle: str):
@@ -171,3 +177,25 @@ def create_graph_from_dataframe(df: pd.DataFrame, metric="view_count"):
     plt.xticks(rotation=45)
     plt.tight_layout()
     plt.show()
+
+
+def display_stats_from_dataframe(df: pd.DataFrame):
+    """Display video statistics from a dataframe."""
+    # display channel video stats
+    metric_names = ["view_count", "like_count", "comment_count"]
+    columns = [df[metric_name] for metric_name in metric_names]
+
+    # print header
+    print(f"{'Metric':<15}|{'Mean':<15}|{'Median':<15}|{'Std Dev':<15}")
+    print("-" * 63)
+
+    # print data
+    for column in columns:
+        print(
+            f"{snake_to_capitals(column.name):<15}|{column.mean():<15f}|{column.median():<15f}|{column.std():<15f}"
+        )
+
+
+def save_to_csv(df: pd.DataFrame, target_dir: Path):
+    """Save data to work with the data elsewhere."""
+    df.to_csv(target_dir)

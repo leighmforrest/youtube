@@ -16,6 +16,7 @@ from tests.data import (
 )
 from youtube.db import init_db
 from youtube.db.models import Channel, Video, VideoStats, ChannelStats
+from youtube.db.utils import create_time_series_dataframe
 
 
 @pytest.fixture
@@ -201,3 +202,10 @@ def test_seven_videos_stats_old(test_session, test_seven_videos_with_old_stats):
     test_session.commit()
 
     yield video_stats
+
+
+@pytest.fixture
+def test_dataframe(test_session, test_channel, test_five_videos_stats_current):
+    df = create_time_series_dataframe(test_session, test_channel)
+
+    yield df

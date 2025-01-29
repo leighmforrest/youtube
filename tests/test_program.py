@@ -1,3 +1,7 @@
+import pytest
+
+import matplotlib.pyplot as plt
+
 from tests.data import (
     mock_request_channel_data,
     mock_request_channel_stats,
@@ -10,7 +14,11 @@ from youtube.program import (
     get_video_ids_not_in_database,
     get_video_data,
     get_video_stats,
+    create_graph_from_dataframe,
+    save_to_csv,
+    display_stats_from_dataframe,
 )
+from youtube.utils import remove_at_symbol, snake_to_capitals
 from youtube.db.utils import get_recent_channel_stats, find_videos_with_no_or_old_stats
 from youtube.db.models import Channel, ChannelStats
 
@@ -139,3 +147,44 @@ class TestGetVideoIdsNotInDatabase:
 
         assert "All videos have up-to-date stats." in captured.out
         assert not find_videos_with_no_or_old_stats(test_session, test_channel)
+
+
+class TestCreateGraphFromFataframe:
+    @pytest.mark.parametrize("metric", ["view_count", "like_count", "comment_count"])
+    def test_graph_created(self, metric, test_dataframe, mocker):
+        mock_show = mocker.patch("youtube.program.plt.show")
+        mock_figure = mocker.patch(
+            "youtube.program.plt.figure", return_value=plt.figure()
+        )
+
+        create_graph_from_dataframe(test_dataframe, metric)
+        mock_show.assert_called_once()
+        mock_figure.assert_called_once()
+
+
+class TestSaveToCSV:
+    def test_save_to_csv(self, test_dataframe, tmpdir, test_handle):
+        filename = f"{remove_at_symbol(test_handle)}.csv"
+        file_path = tmpdir / filename
+        save_to_csv(test_dataframe, file_path)
+        assert file_path.exists()
+
+
+class TestDisplayStatsFromDataframe:
+    metric_names = ["view_count", "like_count", "comment_count"]
+
+    def test_display_stats_from_dataframe_header(self, test_dataframe, capsys):
+        display_stats_from_dataframe(test_dataframe)
+        captured = capsys.readouterr()
+
+        assert (
+            f"{'Metric':<15}|{'Mean':<15}|{'Median':<15}|{'Std Dev':<15}"
+            in captured.out
+        )
+
+    @pytest.mark.parametrize("metric", metric_names)
+    def test_display_stats_from_dataframe(self, metric, test_dataframe, capsys):
+        display_stats_from_dataframe(test_dataframe)
+        captured = capsys.readouterr()
+
+        assert snake_to_capitals(metric) in captured.out
