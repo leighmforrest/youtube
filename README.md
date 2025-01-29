@@ -22,6 +22,15 @@ Get into the project root to create the virtual environment and install the depe
     pip install -r requirements.txt
 
 
+## Environment Variables
+
+The program expect that a valid API key to access the JSON API. To store and use the API key, the program uses a package called `python-dotenv` to store this key for program use. The file the key is stored in a file called `.env` in the project root, and the program expects it to be like this:
+
+    YOUTUBE_API_KEY=<YOUTUBE_API_KEY>
+
+Instructions on obtaining a YouTube API key can be obtained [HERE](https://developers.google.com/youtube/v3/getting-started "YouTube Data API Overview").
+
+
 ## Running The Program
 
 `python youtube <handle>`
