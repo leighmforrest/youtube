@@ -15,7 +15,9 @@ To run the code, run `source ~/.bashrc`
 Get into the project root to create the virtual environment and install the dependencies:
 `
     python -m venv .venv
+
     source .venv/bin/activate
+    
     pip install -r requirements.txt
 `
 
