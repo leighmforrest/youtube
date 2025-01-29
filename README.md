@@ -13,13 +13,13 @@ Then you need to add the PYTHONPATH to the bashrc file: `export PYTHONPATH="."`,
 To run the code, run `source ~/.bashrc`
 
 Get into the project root to create the virtual environment and install the dependencies:
-`
+
     python -m venv .venv
 
     source .venv/bin/activate
-    
+
     pip install -r requirements.txt
-`
+
 
 ## Running The Program
 
