@@ -1,22 +1,19 @@
 from pathlib import Path
-from sqlalchemy.orm import Session
-from sqlalchemy import select
+
+import matplotlib.pyplot as plt
 import mplcursors
 import pandas as pd
-import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter, MaxNLocator
-
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from youtube.channels import request_channel_data, request_channel_stats
-from youtube.utils import snake_to_capitals
-from youtube.videos import (
-    get_video_ids_from_api,
-    get_video_data_from_api,
-    get_video_stats_from_api,
-)
 from youtube.db.models import Channel, ChannelStats, Video, VideoStats
-from youtube.db.utils import get_recent_channel_stats, find_videos_with_no_or_old_stats
-
+from youtube.db.utils import (find_videos_with_no_or_old_stats,
+                              get_recent_channel_stats)
+from youtube.utils import snake_to_capitals
+from youtube.videos import (get_video_data_from_api, get_video_ids_from_api,
+                            get_video_stats_from_api)
 
 METRICS = {
     "view_count": {"color": "red", "display_name": "View Count"},

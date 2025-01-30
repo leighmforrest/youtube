@@ -1,9 +1,10 @@
 from datetime import datetime
+
 from youtube.request import get_youtube_request
 from youtube.utils import chunk_list, get_total_seconds
 
 
-def extract_video_data(data):
+def extract_video_data(data: dict) -> dict:
     """Extract needed video data from api data."""
     video_id = data["id"]
     snippet = data["snippet"]
@@ -24,7 +25,7 @@ def extract_video_data(data):
     }
 
 
-def extract_video_statistics(data):
+def extract_video_statistics(data: dict) -> dict:
     """Extract needed statistics from api data."""
     video_id = data["id"]
     statistics = data["statistics"]
@@ -38,7 +39,7 @@ def extract_video_statistics(data):
     }
 
 
-def get_video_ids_from_api(playlist_id: str):
+def get_video_ids_from_api(playlist_id: str) -> list[str]:
     """Retrieve all of the videos in the uploads playlist."""
     params = {"part": "contentDetails", "playlistId": playlist_id, "maxResults": 50}
     video_ids = []
@@ -61,7 +62,7 @@ def get_video_ids_from_api(playlist_id: str):
     return video_ids
 
 
-def get_video_data_from_api(video_ids):
+def get_video_data_from_api(video_ids: list[str]) -> list[tuple[dict, dict]]:
     """Obtain video data and statistics for each video in the list."""
     videos = []
     print("Getting video data from API")
@@ -81,7 +82,7 @@ def get_video_data_from_api(video_ids):
     return videos
 
 
-def get_video_stats_from_api(video_ids):
+def get_video_stats_from_api(video_ids: list[str]) -> list[dict]:
     """Obtain video stats and statistics for each video in the list."""
     videos = []
     print("Getting video stats from API")

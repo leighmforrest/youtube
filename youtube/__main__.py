@@ -1,17 +1,14 @@
 import argparse
+
 from youtube.db import init_db
-from youtube.db.utils import create_time_series_dataframe, get_recent_channel_stats
-from youtube.program import (
-    get_channel_data,
-    get_video_data,
-    get_video_stats,
-    create_graph_from_dataframe,
-    display_stats_from_dataframe,
-    save_to_csv,
-    display_channel_stats,
-)
-from youtube.utils import remove_at_symbol, add_at_symbol
+from youtube.db.utils import (create_time_series_dataframe,
+                              get_recent_channel_stats)
+from youtube.program import (create_graph_from_dataframe,
+                             display_channel_stats,
+                             display_stats_from_dataframe, get_channel_data,
+                             get_video_data, get_video_stats, save_to_csv)
 from youtube.settings import BASE_DIR
+from youtube.utils import add_at_symbol, remove_at_symbol
 
 parser = argparse.ArgumentParser(
     prog="YouTube",

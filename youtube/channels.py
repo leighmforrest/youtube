@@ -3,7 +3,7 @@ import requests
 from youtube.request import get_youtube_request
 
 
-def extract_channel_data(handle, data):
+def extract_channel_data(handle: str, data: dict) -> dict:
     """Filters the response and prepares all data needed for function return."""
     # extract the parts
     snippet = data["snippet"]
@@ -28,7 +28,8 @@ def extract_channel_data(handle, data):
     }
 
 
-def extract_channel_stats(handle, data):
+def extract_channel_stats(handle: str, data: dict) -> dict:
+    """Extract the channel stats from a JSON response."""
     stats = data["statistics"]
 
     view_count = stats["viewCount"]
@@ -43,7 +44,8 @@ def extract_channel_stats(handle, data):
     }
 
 
-def request_channel_data(handle: str):
+def request_channel_data(handle: str) -> dict:
+    """Get channel data from the api."""
     try:
         params = {"forHandle": handle, "part": "snippet,contentDetails"}
         response = get_youtube_request(params=params)
@@ -58,7 +60,8 @@ def request_channel_data(handle: str):
         return None
 
 
-def request_channel_stats(handle: str):
+def request_channel_stats(handle: str) -> dict:
+    """Request channel stats from the API."""
     try:
         params = {"forHandle": handle, "part": "statistics"}
         response = get_youtube_request(params=params)

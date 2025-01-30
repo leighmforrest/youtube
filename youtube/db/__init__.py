@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, DeclarativeBase
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 current_dir = Path(__file__).resolve().parent
 default_database_url = f"sqlite+pysqlite:///{current_dir}/youtube.db"
